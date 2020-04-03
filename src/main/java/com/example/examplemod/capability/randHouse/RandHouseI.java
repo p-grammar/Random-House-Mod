@@ -22,4 +22,14 @@ public interface RandHouseI {
 	
 	void changePoints(int points);
 	
+	boolean getCountdownReady();
+	
+	void setCountdownReady(boolean countdownReady);
+	
+	/* util */
+	
+	void reset();
+	
+	void copy(RandHouseI other);
+	
 }

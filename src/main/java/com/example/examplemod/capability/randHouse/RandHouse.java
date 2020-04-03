@@ -3,10 +3,14 @@ package com.example.examplemod.capability.randHouse;
 import com.example.examplemod.ExampleMod;
 import com.example.examplemod.Reference;
 import com.example.examplemod.capability.Provider;
+import com.example.examplemod.command.smartFill.SmartFill;
+import com.example.examplemod.server.Server;
 import jdk.nashorn.internal.ir.BlockStatement;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,6 +18,8 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.IntNBT;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -33,6 +39,8 @@ import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.TextComponentMessageFormatHandler;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import org.jline.utils.InfoCmp;
 
 import javax.annotation.Nonnull;
@@ -83,11 +91,8 @@ public class RandHouse {
 		final RandHouseI oldRandHouse = getRandHouse(event.getOriginal());
 		final RandHouseI newRandHouse = getRandHouse(event.getPlayer());
 		
-		if (oldRandHouse != null && newRandHouse != null) {
-			newRandHouse.setPoints(oldRandHouse.getPoints());
-			newRandHouse.setTimeLeft(oldRandHouse.getTimeLeft());
-			newRandHouse.setParticipating(oldRandHouse.getParticipating());
-		}
+		if (oldRandHouse != null && newRandHouse != null)
+			newRandHouse.copy(oldRandHouse);
 	}
 	
 	@SubscribeEvent
@@ -97,9 +102,10 @@ public class RandHouse {
 			
 			RandHouseI randHouse = getRandHouse(player);
 			
-			//BlockState block = event.getPlacedBlock();
-			
 			randHouse.changePoints(1);
+			
+			/* we are ready to count down */
+			randHouse.setCountdownReady(true);
 		}
 	}
 	
@@ -119,17 +125,21 @@ public class RandHouse {
 	@SubscribeEvent
 	public static void onTick(TickEvent.ServerTickEvent event) {
 		if(event.phase == TickEvent.Phase.END) {
-			if (Minecraft.getInstance().world != null && Minecraft.getInstance().player != null && Minecraft.getInstance().player.getServer() != null) {
-				List<ServerPlayerEntity> playerList = Minecraft.getInstance().player.getServer().getPlayerList().getPlayers();
+			if (Server.server != null) {
+				List<ServerPlayerEntity> playerList = Server.server.getPlayerList().getPlayers();
 				
 				for (ServerPlayerEntity player : playerList) {
 					RandHouseI randHouse = player.getCapability(RAND_HOUSE_CAPABILITY).orElse(null);
 					
-					if (randHouse != null) {
+					if (randHouse != null && randHouse.getCountdownReady()) {
 						randHouse.changeTimeLeft(-1);
 						
+						/* time runs out */
 						if (randHouse.getTimeLeft() <= 0) {
 							randHouse.setTimeLeft(randHouse.getMaxTime());
+							randHouse.setCountdownReady(false);
+							
+							SmartFill.smartFillExec(player);
 						}
 					}
 				}

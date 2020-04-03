@@ -4,6 +4,7 @@ import com.example.examplemod.ExampleMod;
 import com.example.examplemod.Reference;
 import com.example.examplemod.capability.randHouse.RandHouse;
 import com.example.examplemod.capability.randHouse.RandHouseI;
+import com.example.examplemod.server.Server;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import jdk.nashorn.internal.runtime.logging.DebugLogger;
@@ -13,9 +14,11 @@ import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.RenderState;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.entity.SpriteRenderer;
+import net.minecraft.client.renderer.texture.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -29,53 +32,52 @@ import net.minecraftforge.server.permission.context.PlayerContext;
 import org.lwjgl.opengl.GL11;
 import sun.java2d.pipe.RenderingEngine;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.concurrent.Executor;
+import java.util.stream.Stream;
 
 import static net.minecraftforge.fml.client.gui.GuiUtils.drawTexturedModalRect;
 
 @Mod.EventBusSubscriber(bus=Mod.EventBusSubscriber.Bus.MOD)
 public class TimerHUD {
 	
-	private static PlayerEntity player;
-	
 	public static final ResourceLocation barResource = new ResourceLocation("minecraft:textures/gui/icons.png");
 	public static final ResourceLocation customBarResource = new ResourceLocation("randomhousemod:textures/timerbar.png");
+	public static AtlasTexture texture = null;
 	
 	/**
 	 * registers the timer HUD
 	 */
 	public static void register() {
 		MinecraftForge.EVENT_BUS.register(TimerHUD.class);
-		
-		Minecraft.getInstance().getRenderManager().textureManager.loadAsync(customBarResource, new Executor() {
-			@Override
-			public void execute(Runnable command) {
-			
-			}
-		});
-	}
-	
-	@SubscribeEvent
-	public static void onLogIn(PlayerEvent.PlayerLoggedInEvent event) {
-		PlayerEntity loggedPlayer = event.getPlayer();
-		
-		//if (loggedPlayer.isUser())
-		//if (loggedPlayer.getName().equals(Minecraft.getInstance().getName())) {
-			player = loggedPlayer;
-		//}
-		ExampleMod.LOGGER.info("RESOURCE YAYA: " + barResource.getPath());
 	}
 	
 	/* events */
 	
 	@SubscribeEvent
 	public static void onRenderOverlay(RenderGameOverlayEvent event) {
-		if (player == null)
+		if(texture == null) {
+			ExampleMod.LOGGER.info("CREATING DA FIN TEXTURO");
+			
+			texture = new AtlasTexture(customBarResource);
+			try {
+				texture.loadTexture(Minecraft.getInstance().getResourceManager());
+				texture.upload(new AtlasTexture.SheetData(new HashSet<ResourceLocation>(), 256, 256, 0, new ArrayList<TextureAtlasSprite>()));
+				ExampleMod.LOGGER.info("HMHMHMMHMHMHMM  GEH SH");
+			} catch (Exception ex) {
+				ExampleMod.LOGGER.info(ex.getMessage());
+			}
+			
+			ExampleMod.LOGGER.info("OHYAOHYA: " + texture.getGlTextureId());
+		}
+		
+		if (Server.player == null)
 			return;
 		
-		RandHouseI randHouse = player.getCapability(RandHouse.RAND_HOUSE_CAPABILITY).orElse(null);
+		RandHouseI randHouse = Server.player.getCapability(RandHouse.RAND_HOUSE_CAPABILITY).orElse(null);
 		
-		/* if somehow this player doesn't have random house capability, exit */
 		if (randHouse == null)
 			return;
 		
@@ -87,7 +89,8 @@ public class TimerHUD {
 		RenderSystem.enableBlend();
 		
 		/* render bar */
-		textureManager.bindTexture(barResource);
+		//textureManager.bindTexture(customBarResource);
+		textureManager.bindTexture(customBarResource);
 		
 		double scale = event.getWindow().getGuiScaleFactor();
 		
@@ -101,14 +104,14 @@ public class TimerHUD {
 		int barY = height - 22 - barHeight;
 		
 		/* draw back of bar */
-		drawTexturedModalRect(barX, barY, 0, 69, barWidth, barHeight, 0);
+		drawTexturedModalRect(barX, barY, 0, 0, barWidth, barHeight, 0);
 		
 		/* draw active bar */
 		float barFill = (float)randHouse.getTimeLeft() / randHouse.getMaxTime();
 		int newBarWidth = (int)(barWidth * barFill);
 		int newBarX = (int)((width / 2.0f) - (newBarWidth / 2.0f));
 		
-		drawTexturedModalRect(newBarX, barY, 0, 64, newBarWidth, barHeight, 0);
+		drawTexturedModalRect(newBarX, barY, 0, 5, newBarWidth, barHeight, 0);
 		
 		/* render points */
 		int points = randHouse.getPoints();
