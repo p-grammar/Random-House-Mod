@@ -1,6 +1,7 @@
 package com.example.examplemod;
 
 import com.example.examplemod.capability.randHouse.RandHouse;
+import com.example.examplemod.command.participateRandHouse.ParticipateRandHouse;
 import com.example.examplemod.command.resetRandHouse.ResetRandHouse;
 import com.example.examplemod.command.smartFill.SmartFill;
 import com.example.examplemod.hud.TimerHUD;
@@ -86,7 +87,8 @@ public class ExampleMod
     @SubscribeEvent
     public void onServerStarting(FMLServerStartingEvent event) {
         LOGGER.info("HELLO from server starting");
-        
+    
+        ParticipateRandHouse.register(event.getCommandDispatcher());
         SmartFill.register(event.getCommandDispatcher());
         ResetRandHouse.register(event.getCommandDispatcher());
     }

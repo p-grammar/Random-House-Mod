@@ -13,6 +13,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.*;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -79,10 +80,10 @@ public class SmartFill {
 	
 	public static void smartFillExec(ServerPlayerEntity player) {
 		/* keep track of what we have found so far */
-		Item[] items = new Item[9];
+		Item[] items = new Item[10];
 		
 		/* fill each inventory slot */
-		for (int i = 0; i < 9; ++i) {
+		for (int i = 0; i < 10; ++i) {
 			
 			boolean goAgain;
 			Item selectedItem;
@@ -121,11 +122,19 @@ public class SmartFill {
 				stack.setTag(nbt);
 			}
 			
-			/* place stack in inventory slot */
-			if(!player.inventory.getStackInSlot(i).isEmpty())
-				player.inventory.removeStackFromSlot(i);
-			
-			player.inventory.add(i, stack);
+			if (i == 9) {
+				/* place stack in offhand */
+				//if(player.getItemStackFromSlot(EquipmentSlotType.OFFHAND).isEmpty())
+				
+				player.setItemStackToSlot(EquipmentSlotType.OFFHAND, stack);
+				
+			} else {
+				/* place stack in inventory slot */
+				if(!player.inventory.getStackInSlot(i).isEmpty())
+					player.inventory.removeStackFromSlot(i);
+				
+				player.inventory.add(i, stack);
+			}
 		}
 	}
 	

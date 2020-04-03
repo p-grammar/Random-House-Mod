@@ -57,7 +57,7 @@ public class TimerHUD {
 	/* events */
 	
 	@SubscribeEvent
-	public static void onRenderOverlay(RenderGameOverlayEvent event) {
+	public static void onRenderOverlay(RenderGameOverlayEvent.Pre event) {
 		if(texture == null) {
 			ExampleMod.LOGGER.info("CREATING DA FIN TEXTURO");
 			
@@ -78,7 +78,7 @@ public class TimerHUD {
 		
 		RandHouseI randHouse = Server.player.getCapability(RandHouse.RAND_HOUSE_CAPABILITY).orElse(null);
 		
-		if (randHouse == null)
+		if (randHouse == null || !randHouse.getParticipating())
 			return;
 		
 		EntityRendererManager renderManager = Minecraft.getInstance().getRenderManager();

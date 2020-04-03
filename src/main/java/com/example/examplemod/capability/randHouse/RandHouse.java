@@ -102,6 +102,9 @@ public class RandHouse {
 			
 			RandHouseI randHouse = getRandHouse(player);
 			
+			if (randHouse == null || !randHouse.getParticipating())
+				return;
+			
 			randHouse.changePoints(1);
 			
 			/* we are ready to count down */
@@ -114,6 +117,9 @@ public class RandHouse {
 		PlayerEntity player = event.getPlayer();
 		
 		RandHouseI randHouse = getRandHouse(player);
+		
+		if (randHouse == null || !randHouse.getParticipating())
+			return;
 		
 		randHouse.changePoints(-1);
 		
@@ -131,7 +137,7 @@ public class RandHouse {
 				for (ServerPlayerEntity player : playerList) {
 					RandHouseI randHouse = player.getCapability(RAND_HOUSE_CAPABILITY).orElse(null);
 					
-					if (randHouse != null && randHouse.getCountdownReady()) {
+					if (randHouse != null && randHouse.getParticipating() && randHouse.getCountdownReady()) {
 						randHouse.changeTimeLeft(-1);
 						
 						/* time runs out */
