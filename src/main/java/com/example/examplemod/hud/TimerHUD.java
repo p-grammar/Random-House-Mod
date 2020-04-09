@@ -4,6 +4,7 @@ import com.example.examplemod.ExampleMod;
 import com.example.examplemod.Reference;
 import com.example.examplemod.capability.randHouse.RandHouse;
 import com.example.examplemod.capability.randHouse.RandHouseI;
+import com.example.examplemod.server.Client;
 import com.example.examplemod.server.Server;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -21,6 +22,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
@@ -40,7 +42,8 @@ import java.util.stream.Stream;
 
 import static net.minecraftforge.fml.client.gui.GuiUtils.drawTexturedModalRect;
 
-@Mod.EventBusSubscriber(bus=Mod.EventBusSubscriber.Bus.MOD)
+
+@Mod.EventBusSubscriber(bus=Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class TimerHUD {
 	
 	public static final ResourceLocation barResource = new ResourceLocation("minecraft:textures/gui/icons.png");
@@ -73,10 +76,10 @@ public class TimerHUD {
 			ExampleMod.LOGGER.info("OHYAOHYA: " + texture.getGlTextureId());
 		}
 		
-		if (Server.player == null)
+		if (Client.player == null)
 			return;
 		
-		RandHouseI randHouse = Server.player.getCapability(RandHouse.RAND_HOUSE_CAPABILITY).orElse(null);
+		RandHouseI randHouse = Client.player.getCapability(RandHouse.RAND_HOUSE_CAPABILITY).orElse(null);
 		
 		if (randHouse == null || !randHouse.getParticipating())
 			return;
@@ -108,15 +111,15 @@ public class TimerHUD {
 		
 		/* draw active bar */
 		float barFill = (float)randHouse.getTimeLeft() / randHouse.getMaxTime();
-		int newBarWidth = (int)(barWidth * barFill);
+		int newBarWidth = ((int)(barWidth * barFill) / 2) * 2;
 		int newBarX = (int)((width / 2.0f) - (newBarWidth / 2.0f));
 		
-		drawTexturedModalRect(newBarX, barY, 0, 5, newBarWidth, barHeight, 0);
+		drawTexturedModalRect(newBarX, barY, (barWidth - newBarWidth) / 2, 5, newBarWidth, barHeight, 0);
 		
 		/* render points */
 		int points = randHouse.getPoints();
 		
-		String pointString = "Points: " + String.valueOf(points);
+		String pointString = "Points: " + points;
 		fontRenderer.drawString(pointString, barX, barY - 16, 0xfc6203);
 		
 		RenderSystem.enableAlphaTest();

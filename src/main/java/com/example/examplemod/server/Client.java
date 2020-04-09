@@ -16,23 +16,29 @@ import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 
 import java.util.List;
 
-@Mod.EventBusSubscriber(bus=Mod.EventBusSubscriber.Bus.MOD, value = Dist.DEDICATED_SERVER)
-public class Server {
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+public class Client {
 	
-	public static MinecraftServer server = null;
+	public static PlayerEntity player = null;
 	
 	public static void register() {
-		MinecraftForge.EVENT_BUS.register(Server.class);
+		MinecraftForge.EVENT_BUS.register(Client.class);
 	}
 	
 	@SubscribeEvent
-	public static void serverStart(FMLServerStartedEvent event) {
-		server = event.getServer();
+	public static void onPlayerLogsIn(PlayerEvent.PlayerLoggedInEvent event) {
+		String id = Minecraft.getInstance().getSession().getUsername();
+		
+		if (event.getPlayer().getName().getString().equals(id))
+			player = event.getPlayer();
 	}
 	
 	@SubscribeEvent
-	public static void serverStart(FMLServerStoppedEvent event) {
-		server = null;
+	public static void onPlayerCloned(PlayerEvent.Clone event) {
+		String id = Minecraft.getInstance().getSession().getUsername();
+		
+		if (event.getPlayer().getName().getString().equals(id))
+			player = event.getPlayer();
 	}
 	
 }

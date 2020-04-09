@@ -4,7 +4,7 @@ public class RandHouseImpl implements RandHouseI {
 	
 	public static final boolean DEFAULT_PARTICIPATING = false;
 	public static final boolean DEFAULT_COUNTDOWN_READY = false;
-	public static final int DEFAULT_MAX_TIME = 600;
+	public static final int DEFAULT_MAX_TIME = 800;
 	public static final int DEFAULT_TIME_LEFT = DEFAULT_MAX_TIME;
 	public static final int DEFAULT_POINTS = 0;
 	

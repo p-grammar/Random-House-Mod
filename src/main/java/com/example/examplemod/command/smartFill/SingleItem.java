@@ -2,11 +2,19 @@ package com.example.examplemod.command.smartFill;
 
 import net.minecraft.item.Item;
 
-public class SingleItem implements ItemCategory {
+public class SingleItem extends ItemCategory {
 	
 	private Item single;
 	
 	public SingleItem(Item single) {
+		super();
+		
+		this.single = single;
+	}
+	
+	public SingleItem(CustomNBT customNBT, Item single) {
+		super(customNBT);
+		
 		this.single = single;
 	}
 	

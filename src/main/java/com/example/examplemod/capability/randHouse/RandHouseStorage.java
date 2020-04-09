@@ -14,6 +14,7 @@ import javax.annotation.Nullable;
 public class RandHouseStorage implements Capability.IStorage<RandHouseI> {
 	
 	public static final String PARTICIPATING_TAG = "p";
+	public static final String COUNTDOWNREADY_TAG = "c";
 	public static final String MAXTIME_TAG = "m";
 	public static final String TIMELEFT_TAG = "t";
 	public static final String POINTS_TAG = "s";
@@ -24,6 +25,7 @@ public class RandHouseStorage implements Capability.IStorage<RandHouseI> {
 		CompoundNBT nbt = new CompoundNBT();
 		
 		nbt.putBoolean(PARTICIPATING_TAG, instance.getParticipating());
+		nbt.putBoolean(COUNTDOWNREADY_TAG, instance.getCountdownReady());
 		nbt.putInt(MAXTIME_TAG, instance.getMaxTime());
 		nbt.putInt(TIMELEFT_TAG, instance.getTimeLeft());
 		nbt.putInt(POINTS_TAG, instance.getPoints());
@@ -36,6 +38,7 @@ public class RandHouseStorage implements Capability.IStorage<RandHouseI> {
 		CompoundNBT comp = (CompoundNBT)nbt;
 		
 		instance.setParticipating(comp.getBoolean(PARTICIPATING_TAG));
+		instance.setCountdownReady(comp.getBoolean(COUNTDOWNREADY_TAG));
 		instance.setMaxTime(comp.getInt(MAXTIME_TAG));
 		instance.setTimeLeft(comp.getInt(TIMELEFT_TAG));
 		instance.setPoints(comp.getInt(POINTS_TAG));

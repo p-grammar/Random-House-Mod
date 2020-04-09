@@ -5,6 +5,7 @@ import com.example.examplemod.command.participateRandHouse.ParticipateRandHouse;
 import com.example.examplemod.command.resetRandHouse.ResetRandHouse;
 import com.example.examplemod.command.smartFill.SmartFill;
 import com.example.examplemod.hud.TimerHUD;
+import com.example.examplemod.server.Client;
 import com.example.examplemod.server.Server;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -61,13 +62,15 @@ public class ExampleMod
         
         /* register rand house capabilities */
         RandHouse.register();
-    
-        TimerHUD.register();
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
         // do something that can only be done on the client
         LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().gameSettings);
+    
+        Client.register();
+        
+        TimerHUD.register();
     }
 
     private void enqueueIMC(final InterModEnqueueEvent event)
